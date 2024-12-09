@@ -1,0 +1,37 @@
+{
+  "output": {
+    "filePath": "repopack-output.txt",
+    "style": "plain",
+    "headerText": "=== Packed Code Repository ===\nThis packed file contains the essential codebase for AI processing.\n================================\n\n",
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "showLineNumbers": false,
+    "topFilesLength": 5
+  },
+  "include":  ["**/*.py", "**/*.json", "**/*.md"],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "**/.venv/**",
+      "**/env/**",
+      "**/ENV/**",
+      "**/node_modules/**",
+      "**/build/**",
+      "**/dist/**",
+      "**/*.log",
+      "**/*.tmp",
+      "**/tmp/**",
+      "**/Thumbs.db",
+      "**/.DS_Store",
+      "**/*.egg-info/**",
+      "**/.vscode/**",
+      "**/.idea/**",
+      "**/coverage/**",
+      "**/repopack-output.txt"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
