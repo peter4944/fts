@@ -52,50 +52,68 @@ project_root/
 ├── .pre-commit-config.yaml # Pre-commit hooks
 ├── src/
 │   └── fts/              # Main package
-│       ├── core/              # Core functionality
+│       ├── core/
 │       │   ├── __init__.py
-│       │   ├── base.py        # Base classes (TimeSeries, etc.)
-│       │   ├── validation.py  # Validation framework
+│       │   ├── base.py        # Base classes, constants
+│       │   ├── validation.py  # Input validation
 │       │   └── errors.py      # Error handling
-│       ├── data/             # Data handling
+│       ├── data/
 │       │   ├── __init__.py
-│       │   ├── import_export.py
-│       │   ├── alignment.py   # Return series alignment
-│       │   └── preprocessing.py
-│       ├── statistics/       # Statistical analysis
+│       │   ├── loader.py      # Data import/export
+│       │   ├── alignment.py   # Non-overlapping data handling
+│       │   └── gaps.py        # Gap detection and handling
+│       ├── statistics/
 │       │   ├── __init__.py
-│       │   ├── moments.py     # Statistical moments
-│       │   ├── correlation.py # Correlation calculations
-│       │   └── distributions.py
-│       ├── dtw/             # Dynamic Time Warping
+│       │   ├── base.py        # Basic statistics
+│       │   ├── adjusted.py    # Adjusted metrics
+│       │   ├── timeseries.py  # Time series operations
+│       │   └── returns.py     # Returns calculations
+│       ├── distribution/
 │       │   ├── __init__.py
-│       │   ├── correlation.py # DTW correlation
-│       │   ── parameters.py  # DTW configuration
-│       ├ volatility/      # Volatility modeling
+│       │   └── skew_student_t.py  # Skewed-t distribution fitting and calculations
+│       ├── dtw/
 │       │   ├── __init__.py
-│       │   ├── realized.py    # Realized volatility
-│       │   ├── har.py        # HAR model
-│       │   └─ garch.py      # GARCH model
-│       ├── backfill/        # Backfill functionality
+│       │   ├── similarity.py   # DTW calculations
+│       │   ├── correlation.py  # Correlation conversion
+│       │   └── matrix.py      # Matrix construction
+│       ├── volatility/
 │       │   ├── __init__.py
-│       │   ├── regression.py  # OLS regression
-│       │   └── synthetic.py   # Synthetic data generation
-│       └── utils/           # Utilities
+│       │   ├── garch.py      # GARCH modeling
+│       │   └── har.py        # HAR modeling
+│       ├── backfill/
+│       │   ├── __init__.py
+│       │   └── generator.py   # Synthetic data
+│       └── covariance/
 │           ├── __init__.py
-│           └── memory.py     # Memory management
+│           └── shrinkage.py   # Shrinkage methods
 ├── tests/                    # Test directory (mirrors src structure)
-│   └── fts/                  # Test package
+│   └─ fts/                  # Test package
 │       ├── core/            # Core tests
 │       │   ├── __init__.py
 │       │   ├── test_base.py
 │       │   ├── test_validation.py
 │       │   └── test_errors.py
 │       ├── data/           # Data tests
+│       │   ├── test_loader.py
+│       │   ├── test_alignment.py
+│       │   └── test_gaps.py
 │       ├── statistics/     # Statistics tests
+│       │   ├── test_base.py
+│       │   ├── test_adjusted.py
+���       │   └── test_timeseries.py
+│       ├── distribution/   # Distribution tests
+│       │   └── test_skew_student_t.py
 │       ├── dtw/           # DTW tests
+│       │   ├── test_similarity.py
+│       │   ├── test_correlation.py
+│       │   └── test_matrix.py
 │       ├── volatility/    # Volatility tests
+│       │   ├── test_garch.py
+│       │   └── test_har.py
 │       ├── backfill/      # Backfill tests
-│       └── utils/         # Utilities tests
+│       │   └── test_generator.py
+│       └── covariance/    # Covariance tests
+│           └── test_shrinkage.py
 ├── docs/                     # Documentation
 │   ├── current/              # Current active documentation
 │   │   ├── requirements/    # Requirements documentation
@@ -109,17 +127,31 @@ project_root/
 │   │   ├── implementation/ # Implementation documentation
 │   │   │   ├── overview.md # This document
 │   │   │   ├── src/       # Module implementations
-│   │   │   │   ├── core.md
-│   │   │   │   ├── data.md
-│   │   │   │   ├── statistics.md
-│   │   │   │   ├── dtw.md
-│   │   │   │   ├── volatility.md
-│   │   │   │   ├── backfill.md
-│   │   │   │   └── utils.md
-│   │   │   └── testing/   # Testing documentation
-│   │   │       ├── overview.md
-│   │   │       ├── strategy.md
-│   │   │       └── test_cases/
+│   │   │   │   ├── core/
+│   │   │   │   │   ├── base.md
+│   │   │   │   │   ├── validation.md
+│   │   │   │   │   └── errors.md
+│   │   │   │   ├── data/
+│   │   │   │   │   ├── loader.md
+│   │   │   │   │   ├── alignment.md
+│   │   │   │   │   └── gaps.md
+│   │   │   │   ├── statistics/
+│   │   │   │   │   ├── base.md
+│   │   │   │   │   ├── adjusted.md
+│   │   │   │   │   └── timeseries.md
+│   │   │   │   ├── distribution/
+│   │   │   │   │   └── skew_student_t.md
+│   │   │   │   ├── dtw/
+│   │   │   │   │   ├── similarity.md
+│   │   │   │   │   ├── correlation.md
+│   │   │   │   │   └── matrix.md
+│   │   │   │   ├── volatility/
+│   │   │   │   │   ├── garch.md
+│   │   │   │   │   └── har.md
+│   │   │   │   ├── backfill/
+│   │   │   │   │   └── generator.md
+│   │   │   │   └── covariance/
+│   │   │   │       └── shrinkage.md
 │   │   └── references/    # Reference materials
 │   │       ├── academic_papers/
 │   │       ├── methodologies/
@@ -134,7 +166,144 @@ project_root/
 └── config/                  # Configuration files
 ```
 
-### 2.2 Project Configuration
+### 2.2 Module Function Mapping
+
+#### Core Module (core/)
+##### base.py
+- TimeSeries class
+  * __init__(data: pd.Series, metadata: Optional[Dict] = None)
+  * validate()
+  * align_with(other: TimeSeries) -> Tuple[TimeSeries, TimeSeries]
+- ReturnSeries class (inherits from TimeSeries)
+  * from_price_series(prices: pd.Series, geometric: bool = True)
+  * standardize() -> ReturnSeries
+- TimeSeriesCollection class
+  * __init__(series: Dict[str, TimeSeries])
+  * align(method: str) -> TimeSeriesCollection
+
+##### validation.py
+- validate_returns(returns: pd.Series) -> None
+- validate_parameters(params: Dict[str, Any]) -> None
+- validate_frequency(frequency: str) -> None
+- validate_alignment(series1: pd.Series, series2: pd.Series) -> None
+
+##### errors.py
+- FTSError (base exception)
+- ValidationError
+- ProcessingError
+- ConfigurationError
+
+#### Data Module (data/)
+##### loader.py
+- load_csv_data(filepath: str, date_column: str = 'Date') -> Dict[str, TimeSeries]
+- export_results(data: TimeSeriesCollection, filepath: str) -> None
+- validate_csv_structure(df: pd.DataFrame) -> None
+
+##### alignment.py
+- align_series(series1: pd.Series, series2: pd.Series, method: str) -> Tuple[pd.Series, pd.Series]
+- handle_non_overlapping_data(series: List[pd.Series]) -> pd.DataFrame
+- pairwise_alignment(series1: pd.Series, series2: pd.Series) -> Tuple[pd.Series, pd.Series]
+- synchronized_average_alignment(series: List[pd.Series]) -> pd.DataFrame
+
+##### gaps.py
+- detect_gaps(series: pd.Series) -> List[Tuple[pd.Timestamp, pd.Timestamp]]
+- analyze_gap_patterns(series: pd.Series) -> Dict[str, Any]
+- handle_missing_data(series: pd.Series, method: str) -> pd.Series
+- fill_small_gaps(series: pd.Series, max_gap: int = 5) -> pd.Series
+
+#### Statistics Module (statistics/)
+##### base.py
+- mean_return(returns: pd.Series, geometric: bool = False) -> float
+- stdev(returns: pd.Series, annualized: bool = True) -> float
+- skewness(returns: pd.Series) -> float
+- kurtosis(returns: pd.Series) -> float
+- correlation_matrix(returns: pd.DataFrame) -> pd.DataFrame
+- covariance_matrix(returns: pd.DataFrame, annualized: bool = True) -> pd.DataFrame
+- normalize_returns(returns: pd.Series) -> pd.Series
+
+##### adjusted.py
+- variance_drag(volatility: float) -> float
+- kurtosis_drag(kurtosis: float, volatility: float) -> float
+- skew_drag(skewness: float, volatility: float) -> float
+- geometric_return(arithmetic_return: float, volatility: float) -> float
+- kelly_fraction(returns: pd.Series, distribution: str = 'normal') -> float
+- probabilistic_sharpe_ratio(returns: pd.Series, benchmark_sr: float) -> float
+- deflated_sharpe_ratio(returns: pd.Series, trials: int) -> float
+- max_theoretical_drawdown(sharpe_ratio: float, distribution: str = 'normal') -> float
+- adj_geometric_return(returns: pd.Series, include_higher_moments: bool = True) -> float
+- adj_volatility(returns: pd.Series, include_higher_moments: bool = True) -> float
+- adj_geometric_sharpe_ratio(returns: pd.Series, rf_rate: float = 0.0, include_higher_moments: bool = True) -> float
+
+##### timeseries.py
+- rolling_statistics(returns: pd.Series, window: int) -> pd.DataFrame
+- rolling_correlation(returns1: pd.Series, returns2: pd.Series, window: int) -> pd.Series
+- rolling_beta(returns: pd.Series, market_returns: pd.Series, window: int) -> pd.Series
+- drawdown_series(returns: pd.Series) -> pd.Series
+- pca_factor_returns(returns: pd.DataFrame, n_factors: int) -> pd.DataFrame
+
+#### Distribution Module (distribution/)
+##### skew_student_t.py
+- fit_skewed_t(returns: pd.Series) -> Dict[str, float]
+- calculate_moments(params: Dict[str, float]) -> Dict[str, float]
+- distribution_test(returns: pd.Series) -> Dict[str, float]
+- calculate_student_t_geometric_return(arithmetic_return: float, vol: float, params: Dict[str, float]) -> float
+- calculate_student_t_drag(params: Dict[str, float], vol: float) -> float
+- calculate_student_t_heavy_tail_drag(params: Dict[str, float], vol: float) -> float
+- calculate_student_t_kurtosis_drag(params: Dict[str, float], vol: float) -> float
+- calculate_student_t_skew_drag(params: Dict[str, float], vol: float) -> float
+- calculate_student_t_volatility(params: Dict[str, float]) -> float
+- calculate_student_t_sharpe_ratio(returns: pd.Series, params: Dict[str, float], rf_rate: float = 0.0) -> float
+- calculate_student_t_mtd(vol_target: float, sr_adj: float, params: Dict[str, float], lambda_param: float = 0.2) -> float
+
+#### DTW Module (dtw/)
+##### similarity.py
+- calculate_dtw_distance(series1: pd.Series, series2: pd.Series, window_size: int) -> float
+- normalize_series(series: pd.Series) -> pd.Series
+- get_window_size(frequency: str) -> int
+
+##### correlation.py
+- dtw_to_correlation(similarity: float, inverse_similarity: float) -> float
+- handle_negative_correlation(series1: pd.Series, series2: pd.Series) -> float
+
+##### matrix.py
+- build_correlation_matrix(returns: pd.DataFrame) -> pd.DataFrame
+- validate_matrix_properties(matrix: pd.DataFrame) -> None
+
+#### Volatility Module (volatility/)
+##### garch.py
+- fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> Dict[str, Any]
+- forecast_instantaneous(n_periods: int, start_var: Optional[float] = None) -> np.ndarray
+- forecast_rolling_volatility(n_periods: int, window_size: int) -> pd.Series
+- calculate_persistence() -> float
+- calculate_long_term_volatility() -> float
+
+##### har.py
+- calculate_har_components(returns: pd.Series) -> Dict[str, pd.Series]
+- fit_har_model(rv_components: Dict[str, pd.Series]) -> Dict[str, Any]
+- forecast_har(fitted_model: Dict[str, Any], n_ahead: int) -> pd.Series
+- calculate_har_residuals(fitted_model: Dict[str, Any]) -> pd.Series
+
+#### Backfill Module (backfill/)
+##### generator.py
+- backfill_series(target_series: pd.Series,
+                 explanatory_series: pd.DataFrame,
+                 min_overlap_periods: int = 24) -> pd.Series
+- analyze_relationship(target_series: pd.Series,
+                      explanatory_series: pd.DataFrame) -> Dict[str, Any]
+- generate_synthetic_returns(reg_results: Dict[str, Any],
+                           explanatory_data: pd.DataFrame) -> pd.Series
+- validate_backfill_results(synthetic_returns: pd.Series,
+                          original_returns: pd.Series) -> Dict[str, float]
+
+#### Covariance Module (covariance/)
+##### shrinkage.py
+- ledoit_wolf_shrinkage(returns: pd.DataFrame) -> np.ndarray
+- calculate_shrinkage_constant(sample_cov: np.ndarray,
+                             returns: pd.DataFrame) -> float
+- calculate_target_matrix(sample_cov: np.ndarray) -> np.ndarray
+- validate_covariance_matrix(matrix: np.ndarray) -> bool
+
+### 2.3 Project Configuration
 
 #### Core Configuration
 ```toml
@@ -200,7 +369,7 @@ target-version = ['py38']
 
 [tool.isort]
 profile = "black"
-multi_line_output = 3
+multi-line-output = 3
 
 [tool.mypy]
 python_version = "3.8"
@@ -567,7 +736,7 @@ class ConfigurationError(FTSError):
 ### Statistical Measures
 | Function | Source | Module | Status | Notes | Reference |
 |----------|---------|---------|---------|-------|-----------|
-| mean_return | UR | statistics/moments.py | ✓ | Basic return measure | - |
+| ret_mean | UR | statistics/moments.py | ✓ | Basic return measure | - |
 | [variance_drag][AG#2.1] | BN | statistics/returns.py | ✓ | From methodology | AG#2.1 |
 | [kurtosis_drag][AG#2.1] | BN | statistics/returns.py | ✓ | From methodology | AG#2.1 |
 | [skew_drag][AG#2.1] | BN | statistics/returns.py | ✓ | From methodology | AG#2.1 |
@@ -613,7 +782,7 @@ class ConfigurationError(FTSError):
 | regression_backfill | BN | backfill/regression.py | ✓ | Regression-based | BF#3 |
 
 ### Status Legend
-- ✓: Implemented
+- ✅: Implemented
 - 🚧: In progress
 - ❌: Not started
 - ⚠️: Needs review
@@ -626,111 +795,111 @@ class ConfigurationError(FTSError):
 | validate_parameters | validate_parameters | core/validation.py | ✓ | Parameter checks |
 | validate_frequency | validate_frequency | core/validation.py | ✓ | Time series frequency |
 | validate_alignment | validate_alignment | core/validation.py | ✓ | Series alignment |
-| handle_missing_data | process_missing | data/preprocessing.py | ✓ | Missing data handling |
+| handle_missing_data | handle_missing_data | data/gaps.py | ✓ | Missing data handling |
 | align_series | align_series | data/alignment.py | ✓ | Time series alignment |
-| standardize_frequency | standardize_frequency | data/preprocessing.py | ✓ | Frequency conversion |
-| load_csv_data | import_price_series | data/import_export.py | ✓ | CSV import |
-| export_results | export_data | data/import_export.py | ✓ | Data export |
+| standardize_frequency | standardize_frequency | data/alignment.py | ✓ | Frequency conversion |
+| load_csv_data | load_csv_data | data/loader.py | ✓ | CSV import |
+| export_results | export_results | data/loader.py | ✓ | Data export |
 | cache_management | manage_cache | core/cache.py | ✓ | Memory optimization |
 
 #### 3.1 Series Conversion Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| price_to_ret | price_to_ret | statistics/returns.py | ✓ | - |
-| ret_to_price | ret_to_price | statistics/returns.py | ✓ | - |
-| excess_ret | excess_returns | statistics/returns.py | ✓ | - |
+| price_to_ret | price_to_ret | statistics/base.py | ✓ | - |
+| ret_to_price | ret_to_price | statistics/base.py | ✓ | - |
+| excess_ret | excess_returns | statistics/base.py | ✓ | - |
 | alpha_ret | - | - | 🔴 | Deprecated in v2.0 |
-| ret_to_drawdown | calculate_drawdown_series | risk/drawdown.py | ✓ | Renamed |
-| standardize_ret | standardize_returns | statistics/returns.py | ✓ | - |
+| ret_to_drawdown | drawdown_series | statistics/timeseries.py | ✓ | Renamed |
+| standardize_ret | standardize_returns | statistics/base.py | ✓ | - |
 
 #### 3.2.1 Statistical Analysis Functions - Basic
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| ret_mean | mean_return | statistics/moments.py | ✓ | Renamed |
-| ret_volatility | stdev | statistics/moments.py | ✓ | Renamed |
-| ret_skew | skewness | statistics/moments.py | ✓ | Renamed |
-| ret_kurtosis | kurtosis | statistics/moments.py | ✓ | Renamed |
-| ret_stats | ret_stats | statistics/moments.py | ✓ | - |
+| ret_mean | mean_return | statistics/base.py | ✓ | Renamed |
+| ret_volatility | stdev | statistics/base.py | ✓ | Renamed |
+| ret_skew | skewness | statistics/base.py | ✓ | Renamed |
+| ret_kurtosis | kurtosis | statistics/base.py | ✓ | Renamed |
+| ret_stats | ret_stats | statistics/base.py | ✓ | - |
 
 #### 3.2.2 Statistical Analysis Functions - Annualized Returns
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| annualize_ret | annualized_return | statistics/returns.py | ✓ | - |
-| arithmetic_to_geometric_ret | geometric_return | statistics/returns.py | ✓ | Cross-ref: [AG#2.1] |
+| annualize_ret | annualized_return | statistics/adjusted.py | ✓ | - |
+| arithmetic_to_geometric_ret | geometric_return | statistics/adjusted.py | ✓ | Cross-ref: [AG#2.1] |
 | geometric_to_arithmetic_ret | - | - | 🔴 | Not implemented |
-| calculate_variance_drag | variance_drag | statistics/returns.py | ✓ | Cross-ref: [AG#2.1] |
-| calculate_kurtosis_drag | kurtosis_drag | statistics/returns.py | ✓ | Cross-ref: [AG#2.1] |
-| calculate_skew_drag | skew_drag | statistics/returns.py | ✓ | Cross-ref: [AG#2.1] |
+| calculate_variance_drag | variance_drag | statistics/adjusted.py | ✓ | Cross-ref: [AG#2.1] |
+| calculate_kurtosis_drag | kurtosis_drag | statistics/adjusted.py | ✓ | Cross-ref: [AG#2.1] |
+| calculate_skew_drag | skew_drag | statistics/adjusted.py | ✓ | Cross-ref: [AG#2.1] |
 | calculate_total_drag | - | - | ❌ | Not implemented |
 
 #### 3.2.3 Statistical Analysis Functions - Volatility Adjustments
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| adjust_volatility_kurtosis | adjusted_volatility_normal | statistics/returns.py | ✓ | Cross-ref: [AG#2.2] |
-| annualize_volatility | volatility | statistics/returns.py | ✓ | - |
-| calculate_downside_volatility | downside_volatility | statistics/returns.py | ✓ | - |
-| volatility_of_volatility | vol_of_vol | statistics/returns.py | ✓ | - |
+| adjust_volatility_kurtosis | adjusted_volatility_normal | statistics/adjusted.py | ✓ | Cross-ref: [AG#2.2] |
+| annualize_volatility | volatility | statistics/base.py | ✓ | - |
+| calculate_downside_volatility | downside_volatility | statistics/base.py | ✓ | - |
+| volatility_of_volatility | vol_of_vol | statistics/base.py | ✓ | - |
 
 #### 3.2.4 Statistical Analysis Functions - Drawdowns
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| calculate_drawdown_series | calculate_drawdown | risk/drawdown.py | ✓ | - |
-| maximum_drawdown | max_drawdown | risk/drawdown.py | ✓ | - |
-| average_drawdown | avg_drawdown | risk/drawdown.py | ✓ | - |
-| drawdown_duration | drawdown_duration | risk/drawdown.py | ✓ | - |
-| theoretical_max_drawdown | mtd_normal | performance/kelly.py | ✓ | Cross-ref: [AG#4.1] |
+| calculate_drawdown_series | drawdown_series | statistics/timeseries.py | ✓ | - |
+| maximum_drawdown | max_drawdown | statistics/timeseries.py | ✓ | - |
+| average_drawdown | avg_drawdown | statistics/timeseries.py | ✓ | - |
+| drawdown_duration | drawdown_duration | statistics/timeseries.py | ✓ | - |
+| theoretical_max_drawdown | max_theoretical_drawdown | statistics/adjusted.py | ✓ | Cross-ref: [AG#4.1] |
 
 #### 3.3 Risk and Performance Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| standard_sharpe_ratio | standard_sharpe_ratio | performance/sharpe.py | ✓ | Cross-ref: [AG#3.1] |
-| geometric_sharpe_ratio | geometric_sharpe_ratio | performance/sharpe.py | ✓ | Cross-ref: [AG#3.1] |
-| adjusted_sharpe_ratio | adjusted_geometric_sharpe_ratio | performance/sharpe.py | ✓ | Cross-ref: [AG#3.1] |
-| sortino_ratio | sortino_ratio | performance/metrics.py | ✓ | - |
-| calmar_ratio | calmar_ratio | performance/metrics.py | ✓ | - |
-| probabilistic_sharpe_ratio | probabilistic_sharpe_ratio | performance/sharpe.py | ✓ | Cross-ref: [AG#3.2] |
-| information_ratio | information_ratio | performance/metrics.py | ✓ | - |
-| treynor_ratio | treynor_ratio | performance/metrics.py | ✓ | - |
+| standard_sharpe_ratio | standard_sharpe_ratio | statistics/adjusted.py | ✓ | Cross-ref: [AG#3.1] |
+| geometric_sharpe_ratio | geometric_sharpe_ratio | statistics/adjusted.py | ✓ | Cross-ref: [AG#3.1] |
+| adjusted_sharpe_ratio | adjusted_geometric_sharpe_ratio | statistics/adjusted.py | ✓ | Cross-ref: [AG#3.1] |
+| sortino_ratio | sortino_ratio | statistics/adjusted.py | ✓ | - |
+| calmar_ratio | calmar_ratio | statistics/adjusted.py | ✓ | - |
+| probabilistic_sharpe_ratio | probabilistic_sharpe_ratio | statistics/adjusted.py | ✓ | Cross-ref: [AG#3.2] |
+| information_ratio | information_ratio | statistics/adjusted.py | ✓ | - |
+| treynor_ratio | treynor_ratio | statistics/adjusted.py | ✓ | - |
 
 #### 3.4 Time-Varying Window Statistics Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| rolling_volatility | rolling_volatility | volatility/realized.py | ✓ | Cross-ref: [VF#2] |
-| rolling_volatility_downside | rolling_volatility_downside | volatility/realized.py | ✓ | - |
-| rolling_correlation | rolling_correlation | statistics/correlation.py | ✓ | - |
-| rolling_beta | rolling_beta | statistics/correlation.py | ✓ | - |
-| rolling_sharpe | rolling_sharpe | performance/metrics.py | ✓ | - |
-| rolling_ret | rolling_returns | statistics/returns.py | ✓ | - |
-| hurst_exponent | hurst_exponent | statistics/moments.py | ✓ | - |
+| rolling_volatility | rolling_volatility | statistics/timeseries.py | ✓ | Cross-ref: [VF#2] |
+| rolling_volatility_downside | rolling_volatility_downside | statistics/timeseries.py | ✓ | - |
+| rolling_correlation | rolling_correlation | statistics/timeseries.py | ✓ | - |
+| rolling_beta | rolling_beta | statistics/timeseries.py | ✓ | - |
+| rolling_sharpe | rolling_sharpe | statistics/timeseries.py | ✓ | - |
+| rolling_ret | rolling_returns | statistics/timeseries.py | ✓ | - |
+| hurst_exponent | hurst_exponent | statistics/timeseries.py | ✓ | - |
 
 #### 3.5 Correlation and Dependency Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| correlation | calculate_correlation_matrix | statistics/correlation.py | ✓ | - |
-| rank_correlation | spearman_correlation | statistics/correlation.py | ✓ | - |
-| correlation_to_covariance | correlation_to_covariance | statistics/correlation.py | ✓ | - |
-| covariance_to_correlation | covariance_to_correlation | statistics/correlation.py | ✓ | - |
-| semi_covariance | semi_covariance | statistics/correlation.py | ✓ | - |
+| correlation | calculate_correlation_matrix | statistics/base.py | ✓ | - |
+| rank_correlation | spearman_correlation | statistics/base.py | ✓ | - |
+| correlation_to_covariance | correlation_to_covariance | statistics/base.py | ✓ | - |
+| covariance_to_correlation | covariance_to_correlation | statistics/base.py | ✓ | - |
+| semi_covariance | semi_covariance | statistics/base.py | ✓ | - |
 
 #### 3.6 Matrix Transformation Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| correlation_cluster | correlation_cluster | statistics/correlation.py | ✓ | - |
-| shrink_covariance | ledoit_wolf_shrinkage | statistics/covariance.py | ✓ | Cross-ref: [SC#2] |
+| correlation_cluster | correlation_cluster | statistics/base.py | ✓ | - |
+| shrink_covariance | ledoit_wolf_shrinkage | covariance/shrinkage.py | ✓ | Cross-ref: [SC#2] |
 
 #### 3.7 Distribution Fitting Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| fit_gaussian | fit_normal_dist | statistics/distribution.py | ✓ | Renamed |
-| fit_student_t | fit_t_dist | statistics/distribution.py | ✓ | Renamed |
-| fit_skewed_t | fit_skewed_t_dist | statistics/distribution.py | ✓ | - |
+| fit_gaussian | fit_normal_dist | distribution/skew_student_t.py | ✓ | Renamed |
+| fit_student_t | fit_t_dist | distribution/skew_student_t.py | ✓ | Renamed |
+| fit_skewed_t | fit_skewed_t_dist | distribution/skew_student_t.py | ✓ | - |
 | fit_nig | - | - | 🔴 | Deprecated in v2.0 |
-| distribution_test | test_normality | statistics/distribution.py | ✓ | - |
+| distribution_test | test_normality | distribution/skew_student_t.py | ✓ | - |
 | implied_drag_student_t | - | - | ❌ | Not implemented |
 | implied_heavy_tail_drag_student_t | - | - | ❌ | Not implemented |
 | implied_excess_kurtosis_drag_student_t | - | - | ❌ | Not implemented |
 | implied_skew_drag_student_t | - | - | ❌ | Not implemented |
-| implied_drag_variance | variance_drag | statistics/returns.py | ✓ | Renamed |
+| implied_drag_variance | variance_drag | statistics/adjusted.py | ✓ | Renamed |
 
 #### 3.8 Copula Functions
 All functions in this section are deprecated in v2.0 and moved to separate packages.
@@ -741,8 +910,8 @@ All functions in this section are deprecated in v2.0 and moved to separate packa
 #### 3.10 Utility Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| volatility_target | kelly_fraction_normal | performance/kelly.py | ✓ | Cross-ref: [AG#4.1] |
-| max_theoretical_drawdown | mtd_normal | performance/kelly.py | ✓ | Cross-ref: [AG#4.1] |
+| volatility_target | kelly_fraction_normal | statistics/adjusted.py | ✓ | Cross-ref: [AG#4.1] |
+| max_theoretical_drawdown | max_theoretical_drawdown | statistics/adjusted.py | ✓ | Cross-ref: [AG#4.1] |
 
 #### 3.11-3.12 Interest Rate and DCF Functions
 All functions in these sections are marked as deprecated in v2.0 and moved to separate packages.
@@ -750,30 +919,30 @@ All functions in these sections are marked as deprecated in v2.0 and moved to se
 #### 3.13 Synthetic Series Generation Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| regress_ret | regress_returns | backfill/regression.py | ✓ | Cross-ref: [BF#2] |
-| analyze_residuals | analyze_residuals | backfill/regression.py | ✓ | Cross-ref: [BF#2] |
+| regress_ret | analyze_relationship | backfill/generator.py | ✓ | Cross-ref: [BF#2] |
+| analyze_residuals | validate_backfill_results | backfill/generator.py | ✓ | Cross-ref: [BF#2] |
 | backfill_ret | backfill_series | backfill/generator.py | ✓ | Cross-ref: [BF#2] |
 
 #### 3.14 PCA Factor Analysis Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| pca_decomposition | pca_decomposition | statistics/pca.py | ✓ | Cross-ref: [PCA#3] |
-| select_pca_factors | select_pca_factors | statistics/pca.py | ✓ | Cross-ref: [PCA#3] |
+| pca_decomposition | pca_factor_returns | statistics/timeseries.py | ✓ | Cross-ref: [PCA#3] |
+| select_pca_factors | pca_factor_returns | statistics/timeseries.py | ✓ | Cross-ref: [PCA#3] |
 | pca_factor_ret | calculate_factor_loadings | pca/loadings.py | ✓ | Cross-ref: [PCA#3] |
 | pca_idiosyncratic_ret | generate_factor_scores | pca/scores.py | ✓ | Cross-ref: [PCA#6] |
 
 #### 3.15 Volatility Forecasting Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| forecast_garch | garch_forecast | volatility/garch.py | ✓ | Cross-ref: [VF#1] |
-| forecast_har | har_forecast | volatility/har.py | ✓ | Cross-ref: [VF#2] |
-| calculate_har_components | har_components | volatility/har.py | ✓ | Cross-ref: [VF#2] |
-| fit_garch_model | garch_fit | volatility/garch.py | ✓ | Cross-ref: [VF#1] |
-| fit_har_model | har_fit | volatility/har.py | ✓ | Cross-ref: [VF#2] |
+| forecast_garch | forecast_instantaneous | volatility/garch.py | ✓ | Cross-ref: [VF#1] |
+| forecast_har | forecast_har | volatility/har.py | ✓ | Cross-ref: [VF#2] |
+| calculate_har_components | calculate_har_components | volatility/har.py | ✓ | Cross-ref: [VF#2] |
+| fit_garch_model | fit_garch | volatility/garch.py | ✓ | Cross-ref: [VF#1] |
+| fit_har_model | fit_har_model | volatility/har.py | ✓ | Cross-ref: [VF#2] |
 
 #### 3.16 Dynamic Time Warping Functions
 | Required Function | Current Implementation | Module | Status | Notes |
 |------------------|----------------------|---------|---------|-------|
-| dtw_distance | calculate_dtw_similarity | dtw/similarity.py | ✓ | Cross-ref: [DTW#3] |
-| dtw_similarity | calculate_dtw_similarity | dtw/similarity.py | ✓ | Cross-ref: [DTW#3] |
-| dtw_correlation | build_dtw_correlation_matrix | dtw/correlation.py | ✓ | Cross-ref: [DTW#3] |
+| dtw_distance | calculate_dtw_distance | dtw/similarity.py | ✓ | Cross-ref: [DTW#3] |
+| dtw_similarity | calculate_dtw_distance | dtw/similarity.py | ✓ | Cross-ref: [DTW#3] |
+| dtw_correlation | dtw_to_correlation | dtw/correlation.py | ✓ | Cross-ref: [DTW#3] |
