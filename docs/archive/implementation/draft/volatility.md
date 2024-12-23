@@ -597,4 +597,4 @@ rolling_vol_forecasts_with_hist = garch.forecast_rolling_volatility(
 )
 ```
 
-For detailed methodology, see [VolatilityForecasting_HAR_GARCH.md](../../references/methodologies/VolatilityForecasting_HAR_GARCH.md)
+For detailed methodology, see [VolatilityForecasting_HAR_GARCH.md](../../../current/references/methodologies/VolatilityForecasting_HAR_GARCH.md)

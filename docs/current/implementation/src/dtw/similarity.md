@@ -1,188 +1,146 @@
 # DTW Similarity Module
 
-## 1. Overview
-This module implements core Dynamic Time Warping (DTW) calculations:
-- DTW distance computation
-- Series normalization
-- Window size optimization
-- Distance matrix calculations
+## Overview
+This module provides DTW-based similarity calculations using established libraries (fastdtw) with appropriate standardization and window constraints.
 
-### Core Dependencies
-- numpy: Numerical computations
-- pandas: Time series handling
+## Classes
+
+### DTWSimilarity
+
+```python
+from typing import Tuple, Union, Optional
+import numpy as np
+import pandas as pd
+from fastdtw import fastdtw
+from scipy.spatial.distance import euclidean
+
+from fts.core.errors import ValidationError, ProcessingError
+
+class DTWSimilarity:
+    """Calculates DTW-based similarities between time series."""
+
+    def __init__(self, window_size: int):
+        self.window_size = window_size
+
+    def calculate_similarity_matrices(
+        self,
+        data: pd.DataFrame
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Calculate both original and inverse similarity matrices.
+
+        Args:
+            data: DataFrame of time series
+
+        Returns:
+            Tuple of (original_similarities, inverse_similarities)
+        """
+        n_series = len(data.columns)
+        similarities = np.eye(n_series)
+        inverse_similarities = np.eye(n_series)
+
+        for i in range(n_series):
+            for j in range(i+1, n_series):
+                sim_orig, sim_inv = self.calculate_similarity(
+                    data.iloc[:,i],
+                    data.iloc[:,j]
+                )
+                similarities[i,j] = similarities[j,i] = sim_orig
+                inverse_similarities[i,j] = inverse_similarities[j,i] = sim_inv
+
+        return similarities, inverse_similarities
+
+    def calculate_similarity(
+        self,
+        series1: pd.Series,
+        series2: pd.Series
+    ) -> Tuple[float, float]:
+        """Calculate similarity between two series and its inverse."""
+        try:
+            # Convert and standardize inputs
+            x = self._standardize(self._to_array(series1))
+            y = self._standardize(self._to_array(series2))
+
+            # Validate inputs
+            self._validate_inputs(x, y)
+
+            # Calculate DTW distances for both original and inverted series
+            distance_original, _ = fastdtw(x, y, radius=self.window_size)
+            distance_inverse, _ = fastdtw(x, -y, radius=self.window_size)
+
+            # Convert distances to similarities (0 to 1 scale)
+            max_distance = max(distance_original, distance_inverse)
+            sim_original = 1 - (distance_original / max_distance)
+            sim_inverse = 1 - (distance_inverse / max_distance)
+
+            return sim_original, sim_inverse
+
+        except Exception as e:
+            raise ProcessingError(f"DTW similarity calculation failed: {str(e)}")
+
+    def _standardize(self, series: np.ndarray) -> np.ndarray:
+        """
+        Standardize series to have mean=0 and std=1.
+
+        Standardization is crucial for:
+        1. Scale independence
+        2. Numerical stability
+        3. Fair comparison of original vs inverted series
+        """
+        std = np.std(series)
+        if std == 0:
+            raise ValidationError("Series has zero standard deviation")
+        return (series - np.mean(series)) / std
+
+    def _to_array(self, series: Union[pd.Series, np.ndarray]) -> np.ndarray:
+        """Convert input to numpy array."""
+        if isinstance(series, pd.Series):
+            return series.values
+        return np.asarray(series)
+
+    def _validate_inputs(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Validate input arrays."""
+        if len(x) < 2 or len(y) < 2:
+            raise ValidationError("Time series must have at least 2 points")
+        if not np.isfinite(x).all() or not np.isfinite(y).all():
+            raise ValidationError("Time series contain invalid values")
+```
+
+## Usage Example
+
+```python
+# Initialize DTW calculator with window constraint
+dtw = DTWSimilarity(window_size=10)
+
+# Calculate similarities for both original and inverted series
+sim_original, sim_inverse = dtw.calculate_similarity(series1, series2)
+
+# Higher original similarity indicates positive correlation
+# Higher inverse similarity indicates negative correlation
+print(f"Original similarity: {sim_original:.3f}")
+print(f"Inverse similarity: {sim_inverse:.3f}")
+```
+
+## Implementation Notes
+
+### Key Features
+1. Uses fastdtw library for efficient DTW calculation
+2. Proper standardization of input series
+3. Handles both positive and negative correlations
+4. Window constraints for computational efficiency
+
+### Dependencies
 - fastdtw: Efficient DTW implementation
-- statistics.base: Basic statistics and normalization
+- numpy: Numerical operations
+- pandas: Data handling
 
-### Related Modules
-- dtw/correlation.py: Converts similarities to correlations
-- dtw/matrix.py: Builds correlation matrices
-- statistics/base.py: Provides normalize_returns function
+### Validation Rules
+1. Window size must be positive
+2. Input series must have at least 2 points
+3. Input values must be finite
+4. Series must have non-zero standard deviation
 
-## 2. Methodology References
-
-### Background Documents
-- [DTW_to_CorrelationMatrix.md](../../../references/methodologies/DTW_to_CorrelationMatrix.md)
-  * Section 2.1: DTW algorithm
-  * Section 2.2: Window size selection
-  * Section 2.3: Normalization requirements
-  * Section 2.4: Distance calculations
-
-### Mathematical Foundations
-#### DTW Algorithm
-```python
-# DTW Distance
-D(i,j) = d(xi, yj) + min(
-    D(i-1, j),   # insertion
-    D(i, j-1),   # deletion
-    D(i-1, j-1)  # match
-)
-
-# Window Constraint
-|i - j| ≤ window_size
-
-# Normalization
-z = (x - μ) / σ
-```
-
-## 3. Implementation Details
-
-### 3.1 Core Functions
-```python
-def calculate_dtw_distance(series1: pd.Series,
-                         series2: pd.Series,
-                         window_size: int) -> float:
-    """
-    Calculate DTW distance between two series.
-
-    Args:
-        series1: First time series
-        series2: Second time series
-        window_size: Sakoe-Chiba band width
-
-    Returns:
-        DTW distance value
-
-    Notes:
-        - Uses normalized series
-        - Applies window constraint
-        - Returns symmetric distance
-    """
-    _validate_series(series1, series2)
-
-    # Normalize series
-    norm1 = normalize_returns(series1)
-    norm2 = normalize_returns(series2)
-
-    # Calculate DTW distance
-    distance, _ = fastdtw.fastdtw(
-        norm1.values,
-        norm2.values,
-        radius=window_size
-    )
-    return distance
-
-def get_window_size(frequency: str) -> int:
-    """
-    Get optimal window size for given frequency.
-
-    Args:
-        frequency: Data frequency ('D', 'W', 'M', etc.)
-
-    Returns:
-        Window size in periods
-
-    Notes:
-        - Based on empirical studies
-        - Considers data frequency
-        - Returns conservative estimate
-    """
-    window_sizes = {
-        'D': 21,   # Monthly window
-        'W': 8,    # Monthly window
-        'M': 4,    # Quarterly window
-        'Q': 3,    # Semi-annual window
-        'A': 2     # Annual window
-    }
-    return window_sizes.get(frequency, 21)  # Default to monthly
-```
-
-### 3.2 Performance Considerations
-- Use fastdtw for efficient computation
-- Pre-normalize series
-- Cache window sizes
-- Optimize for large matrices
-
-### 3.3 Error Handling
-```python
-def _validate_series(series1: pd.Series,
-                    series2: Optional[pd.Series] = None) -> None:
-    """Validate input series for DTW calculation."""
-    if len(series1) < 2:
-        raise ValidationError("Series must have at least 2 observations")
-    if not np.isfinite(series1).all():
-        raise ValidationError("Series contains non-finite values")
-    if series2 is not None and len(series1) != len(series2):
-        raise ValidationError("Series must have same length")
-```
-
-## 4. Usage Guidelines
-
-### 4.1 Common Use Cases
-
-#### Basic DTW Distance
-```python
-# Calculate DTW distance
-window = get_window_size('M')  # Monthly data
-dist = calculate_dtw_distance(series1, series2, window)
-
-# Normalize multiple series
-normalized = [normalize_series(s) for s in series_list]
-```
-
-### 4.2 Parameter Selection
-- window_size: Based on data frequency
-- normalization: Always required
-- radius: Usually same as window_size
-
-## 5. Testing Requirements
-
-### Coverage Requirements
-- All functions must have >95% test coverage
-- Edge cases must be explicitly tested
-- Performance benchmarks must be maintained
-
-### Critical Test Cases
-1. Basic Functionality
-   - Known distance patterns
-   - Window constraints
-   - Normalization effects
-
-2. Edge Cases
-   - Short series
-   - Identical series
-   - Inverse series
-   - Missing values
-
-3. Performance Tests
-   - Large series (>1000 points)
-   - Multiple calculations
-   - Memory usage
-
-## 6. Implementation Status
-
-### Completed Features
-- [x] DTW distance calculation
-- [x] Series normalization
-- [x] Window size optimization
-- [x] Input validation
-
-### Known Limitations
-- Limited to univariate series
-- No adaptive window sizing
-- Memory intensive for large series
-
-### Future Enhancements
-- Multivariate DTW
-- Adaptive window sizing
-- GPU acceleration
-- Memory optimization
+### Error Handling
+- ValidationError for invalid inputs
+- ProcessingError for calculation failures
+- Clear error messages

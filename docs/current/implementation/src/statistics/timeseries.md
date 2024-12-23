@@ -14,7 +14,7 @@ This module implements time series transformations and rolling window calculatio
 - statistics.base: Basic statistical calculations
 
 ### Related Modules
-- statistics/base.py: Core statistical functions
+- statistics/metrics.py: Core statistical calculations
 - statistics/adjusted.py: Adjusted metrics
 - distribution/skew_student_t.py: Distribution fitting
 
